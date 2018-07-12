@@ -1,0 +1,172 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+input {
+  border: none;
+  outline: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400;
+}
+
+ul, li {
+  list-style: none;
+}
+
+html,
+body :global(#root) {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  height: 100%;
+}
+
+.row-col {
+  padding-bottom: 25px;
+}
+
+.alert-box {
+  margin: 10px 0 !important;
+}
+
+.date-picker {
+  width: 100%;
+}
+
+.fade-enter {
+  opacity: 0.01;
+  position: absolute;
+  width: 100%;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 200ms ease-in;
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0.01;
+  transition: opacity 200ms ease-in;
+}
+
+html,
+body,
+#root
+> div {
+  min-height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.page-content {
+  margin: 24px 24px 0;
+  background-color: #fff;
+  padding: 24px;
+}
+
+.page-header {
+  background: #fff;
+  padding: 16px 32px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.ant-layout-content > div {
+  margin: 24px 24px 0;
+  background-color: #fff;
+  padding: 24px;
+}
+
+.ant-layout-content > div.home {
+  padding: 0;
+  background-color: transparent;
+}
+
+.icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
+}
+
+.am-navbar.am-navbar-dark {
+  background-image: linear-gradient(-90deg, #FFEA5B 0%, #FFD948 100%);
+  color: #000;
+}
+
+.h5 {
+  background-color: #f6f6f6;
+}
+.h5 .am-input-label.am-input-label-5,
+.h5 .am-list-item .am-list-line .am-list-content {
+  font-size: 13px !important;
+  color: #b2b2b2 !important;
+  font-weight: 400 !important;
+  flex: none;
+  width: 80px !important;
+}
+
+.h5 .avatar-uploader {
+  width: 61px !important;
+  height: 61px !important;
+  float: left !important;
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+.h5 .avatar-uploader .ant-upload {
+  width: 100% !important;
+  height: 100% !important;
+  font-size: 20px !important;
+}
+.h5 .ant-upload.ant-upload-select-picture-card > .ant-upload {
+  padding: 4px !important;
+}
+
+
+.am-list-item .am-list-line .am-list-extra {
+  flex-basis: 100%;
+  text-align: left !important;
+}
+
+.btn {
+  height: 30px;
+  font-size: 16px;
+  line-height: 30px;
+}
+
+.clearfix {
+  zoom: 1;
+}
+
+.clearfix:before,
+.clearfix:after {
+  content: ' ';
+  display: table;
+}
+
+.clearfix:after {
+  clear: both;
+  visibility: hidden;
+  font-size: 0;
+  height: 0;
+}
+
+.middle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
