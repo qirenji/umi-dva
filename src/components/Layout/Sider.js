@@ -1,67 +1,142 @@
-import { Icon, Menu, Layout } from 'antd'
-import { Link } from 'dva/router';
+import React from 'react'
+import PropTypes from 'prop-types'
+import { Menu, Icon, Layout } from 'antd'
+import { Link } from 'react-router-dom'
+import { arrayToTree, queryArray } from 'utils'
+import pathToRegexp from 'path-to-regexp'
 
-const { SubMenu } = Menu;
+const { SubMenu } = Menu
+let openKeysFlag = false
 
 const Sider = ({
-  menu, current, navOpenKeys,onOpenChange
+   navOpenKeys, changeOpenKeys, menu, location
 }) => {
-  /**
-   * 创建子目录
-   * @param child
-   * @returns {XML}
-   */
-  const buildMenu = (item) => {
-    return (
-      <Menu.Item key={item.key}>
-        <Link to={item.url || '#'} >
-          {item.icon && <Icon type={item.icon} />}
-          {item.name}
-        </Link>
-      </Menu.Item>
-    )
-  }
+  // 生成树状
+  const menuTree = arrayToTree(menu.filter(_ => _.mpid !== '-1'), 'id', 'mpid')
+  const levelMap = {}
 
-  /**
-   * 创建目录
-   * @param item
-   * @returns {*}
-   */
-  const buildSubMenu = (item) => {
-    return (
-      <SubMenu key={item.key} title={<span>
-        {item.icon && <Icon type={item.icon} />}
-         {item.name}</span>}
-      >
-        { item.children.map((child,i)=>{
-          return buildMenu(child)
-        })}
-      </SubMenu>
-    )
+  // 递归生成菜单
+  const getMenus = (menuTreeN, siderFoldN) => {
+    return menuTreeN.map((item) => {
+      if (item.children) {
+        if (item.mpid) {
+          levelMap[item.id] = item.mpid
+        }
+        return (
+          <SubMenu
+            key={item.id}
+            title={<span>
+              {item.icon && <Icon type={item.icon} />}
+              {(!siderFoldN || !menuTree.includes(item)) && item.name}
+            </span>}
+          >
+            {getMenus(item.children, siderFoldN)}
+          </SubMenu>
+        )
+      }
+      return (
+        <Menu.Item key={item.id}>
+          <Link to={item.route || '#'} style={siderFoldN ? { width: 10 } : {}}>
+            {item.icon && <Icon type={item.icon} />}
+            {item.name}
+          </Link>
+        </Menu.Item>
+      )
+    })
   }
+  const menuItems = getMenus(menuTree, false)
 
-  const children = menu.map((item) => {
-    if(item.children && item.children.length){
-      return buildSubMenu(item)
-    }else{
-      return buildMenu(item)
+  // 保持选中
+  const getAncestorKeys = (key) => {
+    let map = {}
+    const getParent = (index) => {
+      const result = [String(levelMap[index])]
+      if (levelMap[result[0]]) {
+        result.unshift(getParent(result[0])[0])
+      }
+      return result
     }
-  });
+    for (let index in levelMap) {
+      if ({}.hasOwnProperty.call(levelMap, index)) {
+        map[index] = getParent(index)
+      }
+    }
+    return map[key] || []
+  }
+
+  const onOpenChange = (openKeys) => {
+    if (navOpenKeys.length) changeOpenKeys([]), openKeysFlag = true
+    const latestOpenKey = openKeys.find(key => !navOpenKeys.includes(key))
+    const latestCloseKey = navOpenKeys.find(key => !openKeys.includes(key))
+    let nextOpenKeys = []
+    if (latestOpenKey) {
+      nextOpenKeys = getAncestorKeys(latestOpenKey).concat(latestOpenKey)
+    }
+    if (latestCloseKey) {
+      nextOpenKeys = getAncestorKeys(latestCloseKey)
+    }
+    changeOpenKeys(nextOpenKeys)
+  }
+
+  let menuProps =  {
+    onOpenChange,
+    openKeys: navOpenKeys,
+  }
+
+
+  // 寻找选中路由
+  let currentMenu
+  let defaultSelectedKeys
+  for (let item of menu) {
+    if (item.route && pathToRegexp(item.route).exec(location.pathname)) {
+      if (!navOpenKeys.length && item.mpid && !openKeysFlag) changeOpenKeys([String(item.mpid)])
+      currentMenu = item
+      break
+    }
+  }
+  const getPathArray = (array, current, pid, id) => {
+    let result = [String(current[id])]
+    const getPath = (item) => {
+      if (item && item[pid]) {
+        if (item[pid] === '-1') {
+          result.unshift(String(item['bpid']))
+        } else {
+          result.unshift(String(item[pid]))
+          getPath(queryArray(array, item[pid], id))
+        }
+      }
+    }
+    getPath(current)
+    return result
+  }
+  if (currentMenu) {
+    defaultSelectedKeys = getPathArray(menu, currentMenu, 'mpid', 'id')
+  }
+
+  if (!defaultSelectedKeys) {
+    defaultSelectedKeys = ['1']
+  }
 
   return (
-    <Layout.Sider style={{ height: '100vh', overflow: 'scroll'}}>
+    <Layout.Sider>
       <Menu
-        mode="inline"
-        theme="dark"
-        className="left-nav"
-        selectedKeys={[current]}
-        style={{height:'calc(100vh + 48px)', overflow: 'scroll'}}
+        {...menuProps}
+        mode={'inline'}
+        theme={'dark'}
+        selectedKeys={defaultSelectedKeys}
+        style={{height:'calc(100vh)', paddingBottom: '50px' ,overflow:'scroll'}}
       >
-        {children}
+        {menuItems}
       </Menu>
-
     </Layout.Sider>
   )
+}
+
+Sider.propTypes = {
+  menu: PropTypes.array,
+  navOpenKeys: PropTypes.array,
+  changeOpenKeys: PropTypes.func,
+  location: PropTypes.object,
 }
 
 export default Sider

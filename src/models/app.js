@@ -1,9 +1,8 @@
 import { routerRedux } from 'dva/router'
 import { parse } from 'qs'
-import { query, logout, login } from 'services/app'
+import { query, logout } from 'services/app'
 import { config, menuList } from 'utils'
 import queryString from 'query-string'
-import * as menusService from 'services/menus'
 
 export default {
 
@@ -68,7 +67,8 @@ export default {
     * logout({
       payload,
     },{ call, put, select }){
-      const data = yield call(logout, parse(payload))
+
+      yield call(logout, parse(payload))
 
       yield put({ type: 'updateState', payload: {
         user: {},

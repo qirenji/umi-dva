@@ -10,11 +10,11 @@ import { withRouter } from 'dva/router'
 import '../themes/index.less'
 import './app.less'
 
-const { Content } = Layout
 const { Header, Sider ,Bread, styles } = MyLayout
 
 
 const { iconFontJS, iconFontCSS, logo } = config
+let lastHref;
 
 const App = ({
   children, dispatch, app, loading, location,
@@ -28,42 +28,34 @@ const App = ({
     },
   }
 
-  //根据url获取选择的标签
-  const currentKey = (() => {
-    let currentUrl = location.pathname;
-    let selectKey;
-    let navSelectKey;
-    for(var value of menu){
-      if(value.url == currentUrl){
-        selectKey = value.key;
-      }
-      if(value.children&&value.children.length){
-        value.children.forEach(function(item){
-          if(item.url == currentUrl){
-            selectKey = item.key;
-            navSelectKey = value.key;
-          }
-        })
-      }
-    }
-    return {
-      selectKey,
-      navSelectKey
-    }
-  })()
-
   const siderProps = {
     menu,
-    current:currentKey.selectKey,
-    navOpenKeys:currentKey.navSelectKey,
+    location,
+    navOpenKeys:navOpenKeys,
     changeOpenKeys (openKeys) {
+      window.localStorage.setItem(`navOpenKeys`, JSON.stringify(openKeys))
+      dispatch({ type: 'app/handleNavOpenKeys', payload: { navOpenKeys: openKeys } })
     },
+  }
 
+  const breadProps = {
+    menu,
+    location,
+  }
+
+  const { href } = window.location
+
+  if (lastHref !== href) {
+    NProgress.start()
+    if (!loading.global) {
+      NProgress.done()
+      lastHref = href
+    }
   }
 
 
   //登录没有layout单独处理
-  if(location.pathname == '/login'){
+  if(location.pathname === '/login'){
     return (<div>
       <Loader fullScreen spinning={loading.effects['app/query']} />
       {children}
@@ -79,16 +71,18 @@ const App = ({
         {/*{iconFontJS && <script src={iconFontJS} />}*/}
         {/*{iconFontCSS && <link rel="stylesheet" href={iconFontCSS} />}*/}
       </Helmet>
-      <Layout className={styles.dark}>
+      <Layout className={styles.dark} style={{height:'calc(100vh)'}} id="mainContainer">
+        <BackTop target={() => document.getElementById('mainContainer')} />
         <Header {...headerProps}/>
         <Layout>
-          <Sider {...siderProps}/>
-          <Content>{children}</Content>
+          {siderProps.menu.length === 0 ? null : <Sider {...siderProps} />}
+          {/*<Bread {...breadProps}/>*/}
+          <div className={styles.mainWindow}>
+            <Bread {...breadProps} />
+            {children}
+          </div>
         </Layout>
       </Layout>
-
-
-
 
     </div>
   )
