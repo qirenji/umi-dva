@@ -19,6 +19,48 @@ const { iconFontJS, iconFontCSS, logo } = config
 const App = ({
   children, dispatch, app, loading, location,
 }) => {
+  const { user ,menu ,navOpenKeys } = app;
+
+  const headerProps = {
+    user,
+    logout () {
+      dispatch({ type: 'app/logout' })
+    },
+  }
+
+  //根据url获取选择的标签
+  const currentKey = (() => {
+    let currentUrl = location.pathname;
+    let selectKey;
+    let navSelectKey;
+    for(var value of menu){
+      if(value.url == currentUrl){
+        selectKey = value.key;
+      }
+      if(value.children&&value.children.length){
+        value.children.forEach(function(item){
+          if(item.url == currentUrl){
+            selectKey = item.key;
+            navSelectKey = value.key;
+          }
+        })
+      }
+    }
+    return {
+      selectKey,
+      navSelectKey
+    }
+  })()
+
+  const siderProps = {
+    menu,
+    current:currentKey.selectKey,
+    navOpenKeys:currentKey.navSelectKey,
+    changeOpenKeys (openKeys) {
+    },
+
+  }
+
 
   //登录没有layout单独处理
   if(location.pathname == '/login'){
@@ -38,9 +80,9 @@ const App = ({
         {/*{iconFontCSS && <link rel="stylesheet" href={iconFontCSS} />}*/}
       </Helmet>
       <Layout className={styles.dark}>
-        <Header />
+        <Header {...headerProps}/>
         <Layout>
-          <Sider />
+          <Sider {...siderProps}/>
           <Content>{children}</Content>
         </Layout>
       </Layout>

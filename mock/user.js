@@ -73,7 +73,7 @@ module.exports = {
         maxAge: 900000,
         httpOnly: true,
       })
-      res.json({ success: true, user: user })
+      res.json({ status: 1, user: user })
     } else {
       res.status(400).end()
     }
@@ -90,9 +90,9 @@ module.exports = {
     }
     const token = JSON.parse(cookies.token)
     if (token) {
-      response.success = token.deadline > new Date().getTime()
+      response.status = token.deadline > new Date().getTime() ? 1 : 0;
     }
-    if (response.success) {
+    if (response.status) {
       const userItem = adminUsers.filter(_ => _.id === token.id)
       if (userItem.length > 0) {
         user.permissions = userItem[0].permissions
@@ -102,6 +102,12 @@ module.exports = {
     }
     response.user = user
     res.json(response)
-  }
+  },
+
+  [`POST /api/admin/logout`] (req, res) {
+    res.clearCookie('token');
+
+    res.status(200).end()
+  },
 
 }

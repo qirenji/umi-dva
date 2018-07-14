@@ -19,5 +19,5 @@ export default {
     services: resolve(__dirname,"./src/services"),
     models: resolve(__dirname,"./src/models"),
     routes: resolve(__dirname,"./src/routes"),
-  },
+  }
 }

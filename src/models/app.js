@@ -1,14 +1,17 @@
-import { query, logout } from 'services/app'
+import { routerRedux } from 'dva/router'
+import { parse } from 'qs'
+import { query, logout, login } from 'services/app'
+import { config, menuList } from 'utils'
+import queryString from 'query-string'
 import * as menusService from 'services/menus'
-import router from 'umi/router'
 
 export default {
 
   namespace: 'app',
   state: {
     user: {},
-    permissions:{},
     menu: [],
+    navOpenKeys: JSON.parse(window.localStorage.getItem(`navOpenKeys`)) || [],
     locationPathname: '',
     locationQuery: {},
   },
@@ -27,43 +30,67 @@ export default {
     },
     setup ({ dispatch }) {
       dispatch({ type: 'query' })
+
     },
   },
 
   effects: {
-    *query({ payload }, { call, put ,select }) {
-      const { success, user } = yield call(query, payload)
+    * query ({
+      payload,
+    }, { call, put, select }) {
+      const data = yield call(query, payload)
       const { locationPathname } = yield select(_ => _.app)
 
-      if(success && user){
-
-        const list = yield call(menusService.query , payload)
-        const { permissions } = user
-        let menu = list
-        if (permissions.role === 'admin' || permissions.role === 'developer') {
-          permissions.visit = list.map(item => item.id)
-
-        } else {
-          menu = list.filter((item) => {
-            const cases = [
-              permissions.visit.includes(item.id),
-              item.mpid ? permissions.visit.includes(item.mpid) || item.mpid === '-1' : true,
-              item.bpid ? permissions.visit.includes(item.bpid) : true,
-            ]
-            return cases.every(_ => _)
-          })
+      if(data && data.user){
+        yield put({
+          type: 'updateState',
+          payload:{
+            user: data.user,
+            menu: menuList
+          }
+        })
+        if (window.location.pathname === '/login') {
+          yield put(routerRedux.push({
+            pathname: '/',
+          }))
         }
-        console.log(menu);
-      }else{
-        router.push('/login')
-      }
 
+      }else if (config.openPages && config.openPages.indexOf(locationPathname) < 0) {
+        yield put(routerRedux.push({
+          pathname: '/login',
+          search: queryString.stringify({
+            from: locationPathname,
+          }),
+        }))
+      }
     },
+
+    * logout({
+      payload,
+    },{ call, put, select }){
+      const data = yield call(logout, parse(payload))
+
+      yield put({ type: 'updateState', payload: {
+        user: {},
+        menu: [],
+      }})
+      yield put({ type: 'query' })
+    }
+
   },
 
   reducers: {
-    save(state, action) {
-      return { ...state, ...action.payload };
+    updateState (state, { payload }) {
+      return {
+        ...state,
+        ...payload,
+      }
+    },
+    handleNavOpenKeys (state, { payload: navOpenKeys }) {
+      return {
+        ...state,
+        ...navOpenKeys,
+      }
     },
   },
 

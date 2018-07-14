@@ -71,7 +71,11 @@ export default function request(url, options = {method: 'GET'}) {
     .then(checkStatus)
     .then(parseJSON)
     .then(data => {
-        return data;
+        if(data.status === 1){
+          return data;
+        }else{
+          router.push('/login');
+        }
     })
     .catch(err => {
       const status = err.name;

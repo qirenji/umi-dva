@@ -1,9 +1,9 @@
-import { connect } from 'dva';
-import { Table, Pagination, Popconfirm, Button } from 'antd';
-import { routerRedux } from 'dva/router';
-import styles from './Users.css';
-import { PAGE_SIZE } from '../constants';
-import UserModal from './UserModal';
+import { connect } from 'dva'
+import { Table, Pagination, Popconfirm, Button } from 'antd'
+import { routerRedux } from 'dva/router'
+import styles from './Users.css'
+import { PAGE_SIZE } from '../constants'
+import UserModal from './UserModal'
 
 function Users({ dispatch, list: dataSource, loading, total, page: current }) {
   function deleteHandler(id) {
