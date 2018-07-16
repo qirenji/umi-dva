@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'dva';
 import SearchBar from './components/SearchBar';
-import Table from './components/Table';
+import MyTable from './components/Table';
 import Modal from './components/Modal';
 
 //immutable
@@ -53,12 +53,15 @@ class Projection extends Component {
 
     }
 
+    const TableOption = {
+
+    }
 
     return (
       <div className="context-wrapper">
           <div className="context-body" >
             <SearchBar {...SearchBarOption}/>
-            {/*<Table {...TableOption}/>*/}
+            <MyTable {...TableOption}/>
             {/*<Modal {...ModalOption}/>*/}
           </div>
       </div>

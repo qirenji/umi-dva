@@ -36,4 +36,4 @@ const SearchBar = () => {
 }
 
 
-export default Form.create()(SearchBar)
+export default SearchBar
